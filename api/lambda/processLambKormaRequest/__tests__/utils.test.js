@@ -12,7 +12,7 @@ describe('explore', () => {
         expect(async () => await explore('bad-url')).rejects.toThrow('the url \'bad-url\' is invalid.');
     });
 
-    test('The basic case', async () => {
+    test('A webpage with no outgoing links', async () => {
         const webpage = `
         <div>Some content, but no other links!</div>
         `
@@ -22,38 +22,75 @@ describe('explore', () => {
         await expect(explore('https://www.a-fake-website.com')).resolves.toEqual(['/'])
     })
 
-    /**
-    test("A circular reference", async () => {
-        // This checks that we can get other pages. 
+    test('A wepage with links to different pages on the same site', async () => {
         const webpageOne = `
         <div>
-            <a href="/two">Link to Webpage Two</a>
-            <a href="/three">Link to Webpage Three</a>
-            <a href="/four">Link to Webpage Four</a>
+            <a href="/second-page">The second page!</a>
         </div>
         `
 
-        // This makes sure that invalid pathnames don't break the code. 
         const webpageTwo = `
         <div>
-            <a href="afake:://pathname">This link is invalid</a>
+            <a href="/third-page">The third page!</a>
         </div>
         `
 
-        // Ensures we can go back to a page we've seen. Also handling a filename. 
         const webpageThree = `
+        <div>Just content here!</div>
+        `
+
+        mockFetch.mockImplementation(async (url) => {
+            switch (url) {
+                case 'https://www.a-fake-website.com/':
+                  return ({ status: 200, text: async () => webpageOne });
+                case 'https://www.a-fake-website.com/second-page':
+                    return ({ status: 200, text: async () => webpageTwo });
+                case 'https://www.a-fake-website.com/third-page':
+                  return ({ status: 200, text: async () => webpageThree });
+                default:
+                  return { status: 404, text: async () => 'Content not found!' };
+            } 
+        });
+
+        await expect(explore('https://www.a-fake-website.com')).resolves.toEqual(['/', '/second-page', '/third-page'])       
+    })
+
+    test('The links in the set of pages form a cycle', async () => {
+        const webpageOne = `
         <div>
-            <a href="/">Link to Webpage One</a>
-            <a href="thisIsAFile.pdf">This is a pdf file</a>
+            <a href="/away-from-home">We are home...</a>
         </div>
         `
 
-        // Ensures that a non-html file won't break the code. 
-        const webpageFour = `
-        {
-            "littleMessage": "This isn't HTML, cheerio should throw an error when trying to parse this!"
-        }
+        const webpageTwo = `
+        <div>
+            <a href="/">This link takes you home...</a>
+        </div>
         `
+
+        mockFetch.mockImplementation(async (url) => {
+            switch (url) {
+                case 'https://www.a-fake-website.com/':
+                  return ({ status: 200, text: async () => webpageOne });
+                case 'https://www.a-fake-website.com/away-from-home':
+                    return ({ status: 200, text: async () => webpageTwo });
+                default:
+                  return { status: 404, text: async () => 'Content not found!' };
+            } 
+        });
+
+        await expect(explore('https://www.a-fake-website.com')).resolves.toEqual(['/', '/away-from-home'])       
     })
-    */
+    
+    test('There is a link to a different site', async () => {
+        const webpage = `
+        <div>
+            <a href="https://www.a-real-website.com">This takes us to a different website</a>
+        </div>
+        `
+
+        mockFetch.mockImplementation(async (url) => ({ status: 200, text: async () => webpage }));
+
+        await expect(explore('https://www.a-fake-website.com')).resolves.toEqual(['/'])       
+    })
 })
