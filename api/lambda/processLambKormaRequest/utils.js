@@ -6,13 +6,15 @@ const logger = require('pino')()
  */
 const explore = async (url) => {
     logger.info(`input to explore: ${JSON.stringify({ url })}`)
-    
+
     // Parse the URL that is passed in. 
     if (!isValidUrl(url)) {
         throw new Error(`the url '${url}' is invalid.`)
     }
 
     let { origin: legalOrigin, pathname: initialPathname } = new URL(url);
+
+    logger.info(`The origin and initial pathname of the passed URL: ${JSON.stringify({legalOrigin, initialPathname})}`);
 
     // All of the pathnames that we've seen. Keeping track of this prevents us from going in circles. 
     let seenPaths = new Set();

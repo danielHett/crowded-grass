@@ -9,7 +9,7 @@
   "description": "The API for crowded-grass",
   "devDependencies": {},
   "scripts": {
-    "test": "jest"
+    "test": "jest --runInBand"
   },
   "author": "Daniel Hettinger",
   "license": "ISC"
