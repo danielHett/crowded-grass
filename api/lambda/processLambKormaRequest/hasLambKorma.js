@@ -15,7 +15,7 @@ const hasLambKorma = async (url) => {
     if (res.status !== 200) return false;
 
     // Check to see if the text has lamb korma. 
-    return (await res.text()).toLowerCase().search(/lamb korma/) !== -1;
+    return (await res.text()).toLowerCase().search(/(lamb|goat) korma/) !== -1;
 }
 
 const getContentType = async (url) => {

@@ -29,3 +29,11 @@ test('The URL points to a file that is HTML but does not contain the string "lam
     await expect(hasLambKorma('https://html-with-lamb-korma.com')).resolves.toEqual(true);
     expect(mockFetch).toHaveBeenCalledTimes(2);
 })
+
+test('The URL points to a file that is HTML but does not contain the string "goat korma"', async () => {
+    mockFetch.mockResolvedValueOnce({ status: 200, headers: new Headers({ "content-type": "text/html" }) });
+    mockFetch.mockResolvedValueOnce({ status: 200, text: async () => 'this is a website, with Goat Korma' });
+
+    await expect(hasLambKorma('https://html-with-goat-korma.com')).resolves.toEqual(true);
+    expect(mockFetch).toHaveBeenCalledTimes(2);
+})
