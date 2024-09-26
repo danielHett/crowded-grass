@@ -19,6 +19,8 @@ const handler = async (event) => {
         return 1;
     })
 
+    logger.info(`order of the restaurants: ${JSON.stringify(restaurants)}`);
+
     for (let restaurant of restaurants) {
         let urls = await explore(restaurant.url);
 
