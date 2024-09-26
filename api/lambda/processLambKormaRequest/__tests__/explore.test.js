@@ -1,4 +1,4 @@
-const { explore } = require('../utils');
+const { explore } = require('../explore');
 
 const mockFetch = jest.fn();
 global.fetch = mockFetch;
@@ -19,7 +19,7 @@ describe('explore', () => {
 
         mockFetch.mockImplementation(async () => ({ status: 200, text: async () => webpage }));
 
-        await expect(explore('https://www.a-fake-website.com')).resolves.toEqual(['/'])
+        await expect(explore('https://www.a-fake-website.com')).resolves.toEqual(['https://www.a-fake-website.com/'])
     })
 
     test('A wepage with links to different pages on the same site', async () => {
@@ -52,7 +52,7 @@ describe('explore', () => {
             } 
         });
 
-        await expect(explore('https://www.a-fake-website.com')).resolves.toEqual(['/', '/second-page', '/third-page'])       
+        await expect(explore('https://www.a-fake-website.com')).resolves.toEqual(['https://www.a-fake-website.com/', 'https://www.a-fake-website.com/second-page', 'https://www.a-fake-website.com/third-page'])       
     })
 
     test('The links in the set of pages form a cycle', async () => {
@@ -79,7 +79,7 @@ describe('explore', () => {
             } 
         });
 
-        await expect(explore('https://www.a-fake-website.com')).resolves.toEqual(['/', '/away-from-home'])       
+        await expect(explore('https://www.a-fake-website.com')).resolves.toEqual(['https://www.a-fake-website.com/', 'https://www.a-fake-website.com/away-from-home'])       
     })
     
     test('There is a link to a different site', async () => {
@@ -91,6 +91,6 @@ describe('explore', () => {
 
         mockFetch.mockImplementation(async (url) => ({ status: 200, text: async () => webpage }));
 
-        await expect(explore('https://www.a-fake-website.com')).resolves.toEqual(['/'])       
+        await expect(explore('https://www.a-fake-website.com')).resolves.toEqual(['https://www.a-fake-website.com/'])       
     })
 })
